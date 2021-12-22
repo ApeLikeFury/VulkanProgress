@@ -5,73 +5,69 @@
 
 #include <stdexcept>
 #include <vector>
-#include <iostream>
 #include <set>
+#include <algorithm>
+
 #include "Utilities.h"
-
-
-const uint32_t WIDTH = 800;
-const uint32_t HEIGHT = 600;
-const std::vector<const char*> validationLayers = { "VK_LAYER_KHRONOS_validation" };
-
-#ifdef NDEBUG
-const bool enableValidationLayers = false;
-#else
-const bool enableValidationLayers = true;
-#endif
-
 
 class VulkanRenderer
 {
 public:
+	VulkanRenderer();
 
-	int init(GLFWwindow* newWindow);
-
+	int init(GLFWwindow * newWindow);
 	void cleanup();
 
+	~VulkanRenderer();
+
 private:
+	GLFWwindow * window;
 
-	GLFWwindow* window;
-
-	// vulkan components
-
+	// Vulkan Components
+	// - Main
 	VkInstance instance;
-
-	struct 
-	{
+	VkDebugReportCallbackEXT callback;
+	struct {
 		VkPhysicalDevice physicalDevice;
 		VkDevice logicalDevice;
-	}mainDevice;
-
+	} mainDevice;
 	VkQueue graphicsQueue;
 	VkQueue presentationQueue;
 	VkSurfaceKHR surface;
+	VkSwapchainKHR swapchain;
+	std::vector<SwapchainImage> swapChainImages;
+
+	// - Utility
+	VkFormat swapChainImageFormat;
+	VkExtent2D swapChainExtent;
 
 	// Vulkan Functions
-	// - create functions
+	// - Create Functions
 	void createInstance();
 	void createLogicalDevice();
 	void createSurface();
-	void createSwapchain();
+	void createSwapChain();
 
-	// - get functions
+	// - Get Functions
 	void getPhysicalDevice();
 
-	// - support functions
-	// -- troubleshooting
-	
-	bool checkValidationLayerSupport();
-
-	// -- checker functions
-	bool checkInstanceExtensionSupport(std::vector<const char*>* checkExtensions);
+	// - Support Functions
+	// -- Checker Functions
+	bool checkInstanceExtensionSupport(std::vector<const char*> * checkExtensions);
 	bool checkDeviceExtensionSupport(VkPhysicalDevice device);
+	bool checkValidationLayerSupport();
 	bool checkDeviceSuitable(VkPhysicalDevice device);
 
 	// -- Getter Functions
-	QueueFamilyIndices GetQueueFamilies(VkPhysicalDevice device);
+	QueueFamilyIndices getQueueFamilies(VkPhysicalDevice device);
 	SwapChainDetails getSwapChainDetails(VkPhysicalDevice device);
 
-	// -- choose functions
-	VkSurfaceFormatKHR chooseBestSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& formats);
+	// -- Choose Functions
+	VkSurfaceFormatKHR chooseBestSurfaceFormat(const std::vector<VkSurfaceFormatKHR> &formats);
+	VkPresentModeKHR chooseBestPresentationMode(const std::vector<VkPresentModeKHR> presentationModes);
+	VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR &surfaceCapabilities);
+
+	// -- Create Functions
+	VkImageView createImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags);
 };
 

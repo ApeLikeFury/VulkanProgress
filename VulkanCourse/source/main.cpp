@@ -7,13 +7,15 @@
 
 #include "VulkanRenderer.h"
 
-GLFWwindow* window;
+GLFWwindow * window;
 VulkanRenderer vulkanRenderer;
 
-void initWindow(std::string wName = "Vulkan", const int width = 800, const int height = 600)
+void initWindow(std::string wName = "Test Window", const int width = 800, const int height = 600)
 {
+	// Initialise GLFW
 	glfwInit();
 
+	// Set GLFW to NOT work with OpenGL
 	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 	glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
@@ -22,13 +24,16 @@ void initWindow(std::string wName = "Vulkan", const int width = 800, const int h
 
 int main()
 {
-	initWindow();
+	// Create Window
+	initWindow("Vulkan", 800, 600);
 
+	// Create Vulkan Renderer instance
 	if (vulkanRenderer.init(window) == EXIT_FAILURE)
 	{
 		return EXIT_FAILURE;
 	}
 
+	// Loop until closed
 	while (!glfwWindowShouldClose(window))
 	{
 		glfwPollEvents();
@@ -36,7 +41,9 @@ int main()
 
 	vulkanRenderer.cleanup();
 
+	// Destroy GLFW window and stop GLFW
 	glfwDestroyWindow(window);
 	glfwTerminate();
+
 	return 0;
 }

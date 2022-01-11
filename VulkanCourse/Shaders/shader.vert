@@ -1,21 +1,18 @@
-#version 450
+#version 450 		// Use GLSL 4.5
 
-layout (location = 0) out vec3 fragColor;
+layout(location = 0) in vec3 pos;
+layout(location = 1) in vec3 col;
 
-vec3 positions[3] = vec3[](
-	vec3(0.0, -0.4, 0.0),
-	vec3(0.4, 0.4, 0.0),
-	vec3(-0.4, 0.4, 0.0)
-);
+layout(binding = 0)	uniform MVP {
+	mat4 projection;
+	mat4 view;
+	mat4 model;
+} mvp;
 
-vec3 colors[3] = vec3[](
-	vec3(1.0, 0.0, 0.0),
-	vec3(0.0, 1.0, 0.0),
-	vec3(0.0, 0.0, 1.0)
-);
+layout(location = 0) out vec3 fragCol;
 
-void main()
-{
-	gl_Position = vec4(positions[gl_VertexIndex], 1.0);
-	fragColor = colors[gl_VertexIndex];
+void main() {
+	gl_Position = mvp.projection * mvp.view * mvp.model * vec4(pos, 1.0);
+
+	fragCol = col;
 }

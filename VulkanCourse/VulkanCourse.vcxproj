@@ -19,10 +19,12 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="source\Mesh.cpp" />
     <ClCompile Include="source\main.cpp" />
     <ClCompile Include="source\VulkanRenderer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="source\Mesh.h" />
     <ClInclude Include="source\Utilities.h" />
     <ClInclude Include="source\VulkanRenderer.h" />
     <ClInclude Include="source\VulkanValidation.h" />

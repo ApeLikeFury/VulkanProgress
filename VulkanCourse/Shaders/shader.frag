@@ -1,10 +1,9 @@
 #version 450
 
-layout(location = 0) in vec3 fragColor;
+layout(location = 0) out vec4 outColour; 	// Final output colour (must also have location
 
-layout(location = 0) out vec4 outColor;
+layout(location = 0) in vec3 fragCol;
 
-void main()
-{
-	outColor = vec4(fragColor, 1.0);
+void main() {
+	outColour = vec4(fragCol, 1.0);
 }

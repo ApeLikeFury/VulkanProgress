@@ -3,12 +3,15 @@
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
+#include <glm/gtc/matrix_transform.hpp>
+
 #include <stdexcept>
 #include <vector>
 #include <set>
 #include <algorithm>
 #include <array>
 
+#include "Mesh.h"
 #include "Utilities.h"
 
 class VulkanRenderer
@@ -17,6 +20,9 @@ public:
 	VulkanRenderer();
 
 	int init(GLFWwindow * newWindow);
+
+	void updateModel(glm::mat4 newModel);
+
 	void draw();
 	void cleanup();
 
@@ -26,6 +32,16 @@ private:
 	GLFWwindow * window;
 
 	int currentFrame = 0;
+
+	// Scene Objects
+	std::vector<Mesh> meshList;
+
+	// scene settings
+	struct MVP {
+		glm::mat4 projection;
+		glm::mat4 view;
+		glm::mat4 model;
+	}mvp;
 
 	// Vulkan Components
 	// - Main
@@ -44,6 +60,15 @@ private:
 	std::vector<VkFramebuffer> swapChainFramebuffers;
 	std::vector<VkCommandBuffer> commandBuffers;
 
+	// - Descriptors
+	VkDescriptorSetLayout descriptorSetLayout;
+
+	VkDescriptorPool descriptorPool;
+	std::vector<VkDescriptorSet> descriptorSets;
+
+	std::vector<VkBuffer> uniformBuffer;
+	std::vector<VkDeviceMemory> uniformBufferMemory;
+
 	// - Pipeline
 	VkPipeline graphicsPipeline;
 	VkPipelineLayout pipelineLayout;
@@ -56,9 +81,9 @@ private:
 	VkFormat swapChainImageFormat;
 	VkExtent2D swapChainExtent;
 
-	// - Synchronization
+	// - Synchronisation
 	std::vector<VkSemaphore> imageAvailable;
-	std::vector<VkSemaphore> renderFinsihed;
+	std::vector<VkSemaphore> renderFinished;
 	std::vector<VkFence> drawFences;
 
 	// Vulkan Functions
@@ -68,13 +93,20 @@ private:
 	void createSurface();
 	void createSwapChain();
 	void createRenderPass();
+	void createDescriptorSetLayout();
 	void createGraphicsPipeline();
 	void createFramebuffers();
 	void createCommandPool();
 	void createCommandBuffers();
 	void createSynchronisation();
 
-	// - record functions
+	void createUniformBuffers();
+	void createDescriptorPool();
+	void createDescriptorSets();
+
+	void updateUniformBuffer(uint32_t imageIndex);
+
+	// - Record Functions
 	void recordCommands();
 
 	// - Get Functions
@@ -84,7 +116,6 @@ private:
 	// -- Checker Functions
 	bool checkInstanceExtensionSupport(std::vector<const char*> * checkExtensions);
 	bool checkDeviceExtensionSupport(VkPhysicalDevice device);
-	bool checkValidationLayerSupport();
 	bool checkDeviceSuitable(VkPhysicalDevice device);
 
 	// -- Getter Functions
@@ -98,6 +129,7 @@ private:
 
 	// -- Create Functions
 	VkImageView createImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags);
-	VkShaderModule createShaderModule(const std::vector<char>& code);
+	VkShaderModule createShaderModule(const std::vector<char> &code);
+
 };
 

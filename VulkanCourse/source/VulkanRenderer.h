@@ -21,7 +21,7 @@ public:
 
 	int init(GLFWwindow * newWindow);
 
-	void updateModel(glm::mat4 newModel);
+	void updateModel(int modelId, glm::mat4 newModel);
 
 	void draw();
 	void cleanup();
@@ -37,11 +37,10 @@ private:
 	std::vector<Mesh> meshList;
 
 	// scene settings
-	struct MVP {
+	struct UboViewProjection {
 		glm::mat4 projection;
 		glm::mat4 view;
-		glm::mat4 model;
-	}mvp;
+	}uboViewProjection;
 
 	// Vulkan Components
 	// - Main
@@ -60,14 +59,24 @@ private:
 	std::vector<VkFramebuffer> swapChainFramebuffers;
 	std::vector<VkCommandBuffer> commandBuffers;
 
+	VkImage depthBufferImage;
+	VkDeviceMemory depthBufferImageMemory;
+	VkImageView DepthBufferImageView;
+
 	// - Descriptors
 	VkDescriptorSetLayout descriptorSetLayout;
+	VkPushConstantRange pushConstantRange;
 
 	VkDescriptorPool descriptorPool;
 	std::vector<VkDescriptorSet> descriptorSets;
 
-	std::vector<VkBuffer> uniformBuffer;
-	std::vector<VkDeviceMemory> uniformBufferMemory;
+	std::vector<VkBuffer> vpUniformBuffer;
+	std::vector<VkDeviceMemory> vpUniformBufferMemory;
+
+	std::vector<VkBuffer> modelDUniformBuffer;
+	std::vector<VkDeviceMemory> modelDUniformBufferMemory;
+
+	
 
 	// - Pipeline
 	VkPipeline graphicsPipeline;
@@ -80,6 +89,10 @@ private:
 	// - Utility
 	VkFormat swapChainImageFormat;
 	VkExtent2D swapChainExtent;
+
+	//VkDeviceSize minUniformBufferOffset;
+	//size_t modelUniformAlignment;
+	//UboModel* modelTransferSpace;
 
 	// - Synchronisation
 	std::vector<VkSemaphore> imageAvailable;
@@ -94,7 +107,9 @@ private:
 	void createSwapChain();
 	void createRenderPass();
 	void createDescriptorSetLayout();
+	void createPushConstantRange();
 	void createGraphicsPipeline();
+	void createDepthBufferImage();
 	void createFramebuffers();
 	void createCommandPool();
 	void createCommandBuffers();
@@ -104,10 +119,13 @@ private:
 	void createDescriptorPool();
 	void createDescriptorSets();
 
-	void updateUniformBuffer(uint32_t imageIndex);
+	void updateUniformBuffers(uint32_t imageIndex);
 
 	// - Record Functions
-	void recordCommands();
+	void recordCommands(uint32_t currentImage);
+
+	// - Allocate functions
+	void allocateDynamicBufferTransferSpace();
 
 	// - Get Functions
 	void getPhysicalDevice();
@@ -126,8 +144,10 @@ private:
 	VkSurfaceFormatKHR chooseBestSurfaceFormat(const std::vector<VkSurfaceFormatKHR> &formats);
 	VkPresentModeKHR chooseBestPresentationMode(const std::vector<VkPresentModeKHR> presentationModes);
 	VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR &surfaceCapabilities);
+	VkFormat chooseSupportedFormat(const std::vector<VkFormat>& formats, VkImageTiling tiling, VkFormatFeatureFlags featureFlags);
 
 	// -- Create Functions
+	VkImage createImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags useFlags, VkMemoryPropertyFlags propFlags, VkDeviceMemory * imageMemory);
 	VkImageView createImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags);
 	VkShaderModule createShaderModule(const std::vector<char> &code);
 
